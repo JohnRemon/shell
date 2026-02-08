@@ -1,21 +1,23 @@
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class Main {
-    public static List<Path> PATH;
+    public static List<Path> PATH = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
+        addPath(System.getenv("PATH"));
+
         do {
             System.out.print("$ ");
             String command = sc.next();
             String arguments = sc.nextLine().trim();
-            addPath(System.getenv("PATH"));
 
             switch (command) {
                 case "exit" -> exit();
