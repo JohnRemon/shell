@@ -50,7 +50,7 @@ public class Main {
 
     private static String getPath(String arguments) {
         String[] paths = System.getenv("PATH").split(File.pathSeparator);
-
+        System.out.print(System.getenv("PATH"));
         for (String path : paths) {
             if (Files.isExecutable(Path.of(path)) && path.endsWith(arguments)) {
                 return path;
