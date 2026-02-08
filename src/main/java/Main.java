@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Main {
@@ -23,10 +24,16 @@ public class Main {
                 case "exit" -> exit();
                 case "echo" -> echo(arguments);
                 case "type" -> type(arguments);
+                case "pwd" -> pwd();
                 default -> System.out.println(command + ": command not found");
             }
 
         } while (true);
+    }
+
+    private static void pwd() {
+        Path curDir = Paths.get("");
+        System.out.println(curDir);
     }
 
     private static void execute(String command, String arguments) throws IOException {
