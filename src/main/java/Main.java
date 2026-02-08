@@ -6,7 +6,7 @@ public class Main {
         do {
             System.out.print("$ ");
             String command = sc.next();
-            String arguments = sc.nextLine();
+            String arguments = sc.nextLine().trim();
 
             switch (command) {
                 case "exit" -> exit();
@@ -20,7 +20,7 @@ public class Main {
     }
 
     private static void echo(String s) {
-        System.out.println(s.trim());
+        System.out.println(s);
     }
 
     private static void exit() {
