@@ -8,19 +8,13 @@ public class Main {
             String command = sc.next();
             String arguments = sc.nextLine();
 
-            if (command.equals("exit")) {
-                return;
-            }
             switch (command) {
-                case "exit":
-                    return;
-                case "echo":
-                    echo(arguments);
-                    break;
-
-                default:
-                    System.out.println(command + ": command not found");
+                case "exit" -> exit();
+                case "echo" -> echo(arguments);
+                case "type" -> type(arguments);
+                default -> System.out.println(command + ": command not found");
             }
+            ;
 
         } while (true);
     }
@@ -28,4 +22,17 @@ public class Main {
     private static void echo(String s) {
         System.out.println(s.trim());
     }
+
+    private static void exit() {
+        System.exit(0);
+    }
+
+    private static void type(String arguments) {
+        if (arguments.equals("echo") || arguments.equals("exit") | arguments.equals("type")) {
+            System.out.println(arguments + " is a shell builtin");
+        } else {
+            System.out.println(arguments + ": not found");
+        }
+    }
+
 }
