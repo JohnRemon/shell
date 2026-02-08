@@ -1,3 +1,4 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,6 +33,10 @@ public class Main {
         String[] args = (command + " " + arguments).split(" ");
         Process process = new ProcessBuilder(args)
                 .start();
+
+        try (BufferedReader reader = process.inputReader()) {
+            reader.lines().forEach(System.out::println);
+        }
     }
 
     private static void echo(String arguments) {
