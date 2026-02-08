@@ -1,11 +1,8 @@
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -15,6 +12,9 @@ public class Main {
             System.out.print("$ ");
             String command = sc.next();
             String arguments = sc.nextLine().trim();
+
+            if (isExecutable(command))
+                execute(command, arguments);
 
             switch (command) {
                 case "exit" -> exit();
@@ -26,8 +26,14 @@ public class Main {
         } while (true);
     }
 
-    private static void echo(String s) {
-        System.out.println(s);
+    private static void execute(String command, String arguments) throws IOException {
+        String[] args = (command + " " + arguments).split(" ");
+        Process process = new ProcessBuilder()
+                .start();
+    }
+
+    private static void echo(String arguments) {
+        System.out.println(arguments);
     }
 
     private static void exit() {
