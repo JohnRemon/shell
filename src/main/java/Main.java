@@ -38,7 +38,11 @@ public class Main {
     }
 
     private static void cd(String arguments) throws IOException {
-        Path newDirectory = currentDirectory.resolve(arguments).normalize();
+        Path newDirectory = currentDirectory.resolve(arguments);
+        if (arguments.equals("~")) {
+            currentDirectory = Path.of(System.getProperty("user.dir"));
+            return;
+        }
         if (Files.isDirectory(newDirectory)) {
             currentDirectory = newDirectory;
         } else {
@@ -53,6 +57,7 @@ public class Main {
     private static void execute(String command, String arguments) throws IOException {
         String[] args = (command + " " + arguments).split(" ");
         Process process = new ProcessBuilder(args)
+                .directory(currentDirectory.toFile())
                 .start();
 
         try (BufferedReader reader = process.inputReader()) {
