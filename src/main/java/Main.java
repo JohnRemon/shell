@@ -13,8 +13,10 @@ public class Main {
             String command = sc.next();
             String arguments = sc.nextLine().trim();
 
-            if (isExecutable(command))
+            if (isExecutable(command)) {
                 execute(command, arguments);
+                continue;
+            }
 
             switch (command) {
                 case "exit" -> exit();
