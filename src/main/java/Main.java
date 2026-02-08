@@ -32,7 +32,7 @@ public class Main {
     }
 
     private static void pwd() {
-        Path curDir = Paths.get("");
+        String curDir = Paths.get("").toAbsolutePath().toString();
         System.out.println(curDir);
     }
 
