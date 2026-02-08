@@ -40,7 +40,7 @@ public class Main {
     private static void cd(String arguments) throws IOException {
         Path newDirectory = currentDirectory.resolve(arguments);
         if (arguments.equals("~")) {
-            currentDirectory = Path.of(System.getProperty("user.dir"));
+            currentDirectory = Path.of(System.getenv("HOME"));
             return;
         }
         if (Files.isDirectory(newDirectory)) {
