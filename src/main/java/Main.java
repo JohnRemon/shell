@@ -8,11 +8,8 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class Main {
-    public static List<Path> PATH = new ArrayList<>();
-
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
-        addPath(System.getenv("PATH"));
 
         do {
             System.out.print("$ ");
@@ -41,8 +38,7 @@ public class Main {
         if (isBuiltin(arguments)) {
             System.out.println(arguments + " is a shell builtin");
         } else if (isExecutable(arguments)) {
-            Path path = getPath(arguments);
-            System.out.println(arguments + " is " + path);
+            System.out.println(arguments + " is " + getPath(arguments));
         } else {
             System.out.println(arguments + ": not found");
         }
@@ -52,23 +48,15 @@ public class Main {
         return getPath(arguments) != null;
     }
 
-    private static Path getPath(String arguments) {
-        for (Path path : PATH) {
-            if (Files.isExecutable(path) && path.endsWith(arguments)) {
+    private static String getPath(String arguments) {
+        String[] paths = System.getenv("PATH").split(File.pathSeparator);
+
+        for (String path : paths) {
+            if (Files.isExecutable(Path.of(path)) && path.endsWith(arguments)) {
                 return path;
             }
         }
         return null;
-    }
-
-    private static void addPath(String arguments) {
-        String[] directories = arguments.split(File.pathSeparator);
-        List<Path> paths = Arrays.stream(directories)
-                .map(Path::of)
-                .collect(Collectors.toList());
-
-        PATH.addAll(paths);
-
     }
 
     private static boolean isBuiltin(String arguments) {
