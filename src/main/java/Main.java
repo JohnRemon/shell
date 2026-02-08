@@ -28,7 +28,7 @@ public class Main {
 
     private static void execute(String command, String arguments) throws IOException {
         String[] args = (command + " " + arguments).split(" ");
-        Process process = new ProcessBuilder()
+        Process process = new ProcessBuilder(args)
                 .start();
     }
 
