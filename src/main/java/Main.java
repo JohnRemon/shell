@@ -3,37 +3,51 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Main {
+    private static Path currentDirectory = Path.of(System.getProperty("user.dir"));
+
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
 
-        do {
-            System.out.print("$ ");
-            String command = sc.next();
-            String arguments = sc.nextLine().trim();
+        try {
+            do {
+                System.out.print("$ ");
+                String command = sc.next();
+                String arguments = sc.nextLine().trim();
 
-            if (isExecutable(command)) {
-                execute(command, arguments);
-                continue;
-            }
+                if (isExecutable(command)) {
+                    execute(command, arguments);
+                    continue;
+                }
 
-            switch (command) {
-                case "exit" -> exit();
-                case "echo" -> echo(arguments);
-                case "type" -> type(arguments);
-                case "pwd" -> pwd();
-                default -> System.out.println(command + ": command not found");
-            }
+                switch (command) {
+                    case "exit" -> exit();
+                    case "echo" -> echo(arguments);
+                    case "type" -> type(arguments);
+                    case "pwd" -> pwd();
+                    case "cd" -> cd(arguments);
+                    default -> System.out.println(command + ": command not found");
+                }
 
-        } while (true);
+            } while (true);
+        } catch (IOException e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
+    }
+
+    private static void cd(String arguments) throws IOException {
+        Path newDirectory = currentDirectory.resolve(arguments).normalize();
+        if (Files.isDirectory(newDirectory)) {
+            currentDirectory = newDirectory;
+        } else {
+            System.out.println("cd: " + arguments + ": No such file or directory");
+        }
     }
 
     private static void pwd() {
-        String curDir = Paths.get("").toAbsolutePath().toString();
-        System.out.println(curDir);
+        System.out.println(currentDirectory);
     }
 
     private static void execute(String command, String arguments) throws IOException {
@@ -81,6 +95,6 @@ public class Main {
 
     private static boolean isBuiltin(String arguments) {
         return arguments.equals("exit") || arguments.equals("type") || arguments.equals("echo")
-                || arguments.equals("pwd");
+                || arguments.equals("pwd") || arguments.equals(("cd"));
     }
 }
