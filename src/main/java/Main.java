@@ -80,6 +80,7 @@ public class Main {
     }
 
     private static boolean isBuiltin(String arguments) {
-        return arguments.equals("exit") || arguments.equals("type") || arguments.equals("echo");
+        return arguments.equals("exit") || arguments.equals("type") || arguments.equals("echo")
+                || arguments.equals("pwd");
     }
 }
