@@ -92,7 +92,7 @@ public class Main {
             return;
         }
 
-        System.out.println("cd: " + directories + ": No such file or directory");
+        System.out.println("cd: " + directories.get(0) + ": No such file or directory");
     }
 
     private static void execute(List<String> tokens) throws IOException {
