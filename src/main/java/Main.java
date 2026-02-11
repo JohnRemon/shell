@@ -3,32 +3,45 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     private static Path currentDirectory = Path.of(System.getProperty("user.dir"));
+    private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) throws Exception {
-        Scanner sc = new Scanner(System.in);
 
         try {
             do {
                 System.out.print("$ ");
-                String command = sc.next();
-                String arguments = sc.nextLine().trim();
+                String input = sc.nextLine();
 
-                if (isExecutable(command)) {
-                    execute(command, arguments);
+                if (input.isEmpty()) {
                     continue;
                 }
 
-                switch (command) {
-                    case "exit" -> exit();
-                    case "echo" -> echo(arguments);
-                    case "type" -> type(arguments);
-                    case "pwd" -> pwd();
-                    case "cd" -> cd(arguments);
-                    default -> System.out.println(command + ": command not found");
+                List<String> tokens = Tokenizer.tokenize(input);
+
+                String command = tokens.get(0);
+
+                List<String> arguments = (tokens.size() > 1)
+                        ? tokens.subList(1, tokens.size())
+                        : Collections.emptyList();
+
+                if (isBuiltin(command)) {
+                    switch (command) {
+                        case "exit" -> exit();
+                        case "echo" -> echo(arguments);
+                        case "type" -> type(tokens.get(0));
+                        case "pwd" -> pwd();
+                        case "cd" -> cd(arguments);
+                    }
+                } else if (isExecutable(command)) {
+                    execute(tokens);
+                } else {
+                    System.out.println(command + ": command not found");
                 }
 
             } while (true);
@@ -37,16 +50,22 @@ public class Main {
         }
     }
 
-    private static void cd(String arguments) throws IOException {
-        Path newDirectory = currentDirectory.resolve(arguments);
-        if (arguments.equals("~")) {
-            currentDirectory = Path.of(System.getenv("HOME"));
-            return;
-        }
-        if (Files.isDirectory(newDirectory)) {
-            currentDirectory = newDirectory;
+    private static void exit() {
+        System.exit(0);
+        sc.close();
+    }
+
+    private static void echo(List<String> tokens) {
+        System.out.println(String.join(" ", tokens));
+    }
+
+    private static void type(String argument) {
+        if (isBuiltin(argument)) {
+            System.out.println(argument + " is a shell builtin");
+        } else if (isExecutable(argument)) {
+            System.out.println(argument + " is " + getPath(argument));
         } else {
-            System.out.println("cd: " + arguments + ": No such file or directory");
+            System.out.println(argument + ": not found");
         }
     }
 
@@ -54,32 +73,35 @@ public class Main {
         System.out.println(currentDirectory);
     }
 
-    private static void execute(String command, String arguments) throws IOException {
-        String[] args = (command + " " + arguments).split(" ");
-        Process process = new ProcessBuilder(args)
+    private static void cd(List<String> directories) throws IOException {
+        if (directories.size() != 1) {
+            System.out.println("cd: " + directories + ": No such file or directory");
+            return;
+        }
+
+        String directory = directories.get(0);
+
+        if (directory.equals("~")) {
+            currentDirectory = Path.of(System.getenv("HOME"));
+            return;
+        }
+
+        Path newDirectory = currentDirectory.resolve(directory).normalize();
+        if (Files.isDirectory(newDirectory)) {
+            currentDirectory = newDirectory;
+            return;
+        }
+
+        System.out.println("cd: " + directories + ": No such file or directory");
+    }
+
+    private static void execute(List<String> tokens) throws IOException {
+        Process process = new ProcessBuilder(tokens)
                 .directory(currentDirectory.toFile())
                 .start();
 
         try (BufferedReader reader = process.inputReader()) {
             reader.lines().forEach(System.out::println);
-        }
-    }
-
-    private static void echo(String arguments) {
-        System.out.println(arguments);
-    }
-
-    private static void exit() {
-        System.exit(0);
-    }
-
-    private static void type(String arguments) {
-        if (isBuiltin(arguments)) {
-            System.out.println(arguments + " is a shell builtin");
-        } else if (isExecutable(arguments)) {
-            System.out.println(arguments + " is " + getPath(arguments));
-        } else {
-            System.out.println(arguments + ": not found");
         }
     }
 
@@ -98,8 +120,8 @@ public class Main {
         return null;
     }
 
-    private static boolean isBuiltin(String arguments) {
-        return arguments.equals("exit") || arguments.equals("type") || arguments.equals("echo")
-                || arguments.equals("pwd") || arguments.equals(("cd"));
+    private static boolean isBuiltin(String command) {
+        return command.equals("exit") || command.equals("type") || command.equals("echo")
+                || command.equals("pwd") || command.equals(("cd"));
     }
 }
