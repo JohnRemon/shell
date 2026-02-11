@@ -32,7 +32,7 @@ public class Tokenizer {
             }
 
             // if we hit a single quote (opening or closing)
-            if (c == '\'') {
+            if (c == '\'' && !doubleQuotation) {
                 quotation = !quotation;
                 continue;
             }
