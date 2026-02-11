@@ -13,9 +13,10 @@ public class Tokenizer {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
 
-            // if we hit backslash we just append immediately
+            // if we hit backslash (without quotation)
             if (backSlash) {
                 current.append(c);
+                // consume backslash
                 backSlash = false;
                 continue;
             }
@@ -30,18 +31,20 @@ public class Tokenizer {
                 continue;
             }
 
-            // if we hit a quote (opening or closing)
-            if (c == '\'' && !doubleQuotation) {
+            // if we hit a single quote (opening or closing)
+            if (c == '\'') {
                 quotation = !quotation;
                 continue;
             }
 
-            if (c == '\"') {
+            // If we hit a double quote (opening or closing)
+            if (c == '\"' && !quotation) {
                 doubleQuotation = !doubleQuotation;
                 continue;
             }
 
-            if (c == '\\') {
+            // if we hit backslash AND we aren't in a quote
+            if (c == '\\' && !quotation) {
                 backSlash = true;
                 continue;
             }
