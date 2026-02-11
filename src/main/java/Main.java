@@ -34,7 +34,7 @@ public class Main {
                     switch (command) {
                         case "exit" -> exit();
                         case "echo" -> echo(arguments);
-                        case "type" -> type(tokens.get(0));
+                        case "type" -> type(arguments.get(0));
                         case "pwd" -> pwd();
                         case "cd" -> cd(arguments);
                     }
