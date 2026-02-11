@@ -9,8 +9,16 @@ public class Tokenizer {
 
         boolean quotation = false;
         boolean doubleQuotation = false;
+        boolean backSlash = false;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
+
+            // if we hit backslash we just append immediately
+            if (backSlash) {
+                current.append(c);
+                backSlash = false;
+                continue;
+            }
 
             // If we hit a space AND we aren't in a quote
             if (c == ' ' && !quotation && !doubleQuotation) {
@@ -30,6 +38,11 @@ public class Tokenizer {
 
             if (c == '\"') {
                 doubleQuotation = !doubleQuotation;
+                continue;
+            }
+
+            if (c == '\\') {
+                backSlash = true;
                 continue;
             }
 
