@@ -13,7 +13,7 @@ public class Tokenizer {
             char c = s.charAt(i);
 
             // If we hit a space AND we aren't in a quote
-            if (c == ' ' && !quotation) {
+            if (c == ' ' && !quotation && !doubleQuotation) {
                 if (current.length() > 0) {
                     tokens.add(current.toString());
                     current.setLength(0);
@@ -23,12 +23,13 @@ public class Tokenizer {
             }
 
             // if we hit a quote (opening or closing)
-            if (c == '\'') {
+            if (c == '\'' && !doubleQuotation) {
                 quotation = !quotation;
                 continue;
             }
 
             if (c == '\"') {
+                doubleQuotation = !doubleQuotation;
                 continue;
             }
 
