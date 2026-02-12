@@ -136,22 +136,7 @@ public class Shell {
     }
 
     private String findRedirectOperator(List<String> tokens) {
-        int idx = tokens.indexOf(">");
-        if (idx != -1) {
-            return ">";
-        }
-
-        idx = tokens.indexOf("1>");
-        if (idx != -1) {
-            return "1>";
-        }
-
-        idx = tokens.indexOf("2>");
-        if (idx != -1) {
-            return "2>";
-        }
-
-        idx = tokens.indexOf(">>");
+        int idx = tokens.indexOf(">>");
         if (idx != -1) {
             return ">>";
         }
@@ -164,6 +149,21 @@ public class Shell {
         idx = tokens.indexOf("2>>");
         if (idx != -1) {
             return "2>>";
+        }
+
+        idx = tokens.indexOf(">");
+        if (idx != -1) {
+            return ">";
+        }
+
+        idx = tokens.indexOf("1>");
+        if (idx != -1) {
+            return "1>";
+        }
+
+        idx = tokens.indexOf("2>");
+        if (idx != -1) {
+            return "2>";
         }
 
         return null;
