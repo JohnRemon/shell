@@ -12,7 +12,7 @@ public class TypeCommand implements Command {
     }
 
     @Override
-    public void execute(List<String> args, PrintStream out) {
+    public void execute(List<String> args, PrintStream out, PrintStream err) {
         String argument = args.get(0);
 
         if (shell.isBuiltin(argument)) {
@@ -22,7 +22,7 @@ public class TypeCommand implements Command {
             if (path != null) {
                 out.println(argument + " is " + path);
             } else {
-                out.println(argument + ": not found");
+                err.println(argument + ": not found");
             }
         }
     }

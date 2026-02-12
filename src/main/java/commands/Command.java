@@ -4,5 +4,5 @@ import java.io.PrintStream;
 import java.util.List;
 
 public interface Command {
-    void execute(List<String> args, PrintStream out) throws Exception;
+    void execute(List<String> args, PrintStream out, PrintStream err) throws Exception;
 }

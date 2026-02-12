@@ -6,7 +6,7 @@ import java.util.List;
 public class EchoCommand implements Command {
 
     @Override
-    public void execute(List<String> args, PrintStream out) {
+    public void execute(List<String> args, PrintStream out, PrintStream err) {
         out.println(String.join(" ", args));
     }
 }

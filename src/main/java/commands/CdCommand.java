@@ -14,9 +14,9 @@ public class CdCommand implements Command {
     }
 
     @Override
-    public void execute(List<String> args, PrintStream out) {
+    public void execute(List<String> args, PrintStream out, PrintStream err) {
         if (args.size() != 1) {
-            out.println("cd: " + args + ": No such file or directory");
+            err.println("cd: " + args + ": No such file or directory");
             return;
         }
 
@@ -33,6 +33,6 @@ public class CdCommand implements Command {
             return;
         }
 
-        out.println("cd: " + directory + ": No such file or directory");
+        err.println("cd: " + directory + ": No such file or directory");
     }
 }
