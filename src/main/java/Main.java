@@ -142,6 +142,11 @@ public class Main {
     }
 
     private static void execute(List<String> tokens) throws IOException {
+        Path argument = Path.of(tokens.get(2));
+
+        if (!Files.exists(argument)) {
+            System.out.println("cd: " + argument + ": No such file or directory");
+        }
         Process process = new ProcessBuilder(tokens)
                 .directory(currentDirectory.toFile())
                 .start();
