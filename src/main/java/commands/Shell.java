@@ -84,8 +84,7 @@ public class Shell {
 
         // if redirection file exists
         if (outputFile != null) {
-            if (redirectOperator.equals("1>") || redirectOperator.equals(">")
-                    || redirectOperator.equals("1>>") || redirectOperator.equals(">>")) {
+            if (redirectOperator.equals("1>") || redirectOperator.equals(">")) {
                 out = new PrintStream(Files.newOutputStream(outputFile.toPath()));
                 err = System.err;
             } else if (redirectOperator.equals("2>")) {
@@ -103,7 +102,9 @@ public class Shell {
                 out = System.out;
                 err = System.err;
             }
-        } else {
+        } else
+
+        {
             // print to normal stdout
             out = System.out;
             err = System.err;
