@@ -58,11 +58,13 @@ public class Shell {
         try {
             if (builtins.containsKey(command)) {
                 PrintStream out;
+
                 if (outputFile != null) {
                     out = new PrintStream(Files.newOutputStream(outputFile.toPath()));
                 } else {
                     out = System.out;
                 }
+
                 try {
                     builtins.get(command).execute(arguments, out);
                     out.flush();
@@ -97,6 +99,7 @@ public class Shell {
         if (System.getenv("PATH") == null) {
             return null;
         }
+
         String[] paths = System.getenv("PATH").split(File.pathSeparator);
         for (String dir : paths) {
             Path fullPath = Path.of(dir, command);

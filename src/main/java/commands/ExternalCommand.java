@@ -16,7 +16,14 @@ public class ExternalCommand implements Command {
     @Override
     public void execute(List<String> args, PrintStream out) throws Exception {
         List<String> fullCommand = new ArrayList<>();
-        fullCommand.add(shell.findExecutable(args.get(0)));
+        String executable = shell.findExecutable(args.getFirst());
+
+        if (executable == null) {
+            return;
+        }
+
+        fullCommand.add(args.getFirst());
+
         if (args.size() > 1) {
             fullCommand.addAll(args.subList(1, args.size()));
         }
