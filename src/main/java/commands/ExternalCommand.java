@@ -43,10 +43,11 @@ public class ExternalCommand implements Command {
         // if there is redirection to a file
         if (redirectFile != null) {
             // redirect output to the correct redirection file
-            if (redirectOperator.equals(">") || redirectOperator.equals("1>")) {
+            if (redirectOperator.equals(">") || redirectOperator.equals("1>")
+                    || redirectOperator.equals(">>") || redirectOperator.equals("1>>")) {
                 processBuilder.redirectOutput(redirectFile);
                 processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
-            } else {
+            } else if (redirectOperator.equals("2>") || redirectOperator.equals("2>>")) {
                 processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 processBuilder.redirectError(redirectFile);
             }

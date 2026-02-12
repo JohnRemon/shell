@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -75,19 +76,32 @@ public class Shell {
         this.redirectFile = outputFile;
         this.redirectOperator = redirectOperator;
 
-        // to print either to redirection file or normal stdout ('>' || '1>')
+        // to print either to redirection file or normal stdout
+        // ('>' || '1>' || '>>' || '1>>')
         PrintStream out;
-        // to print error to redirection file or normal stderr ('2>')
+        // to print error to redirection file or normal stderr ('2>' || '2>>')
         PrintStream err;
 
         // if redirection file exists
         if (outputFile != null) {
-            if (redirectOperator.equals("1>") || redirectOperator.equals(">")) {
+            if (redirectOperator.equals("1>") || redirectOperator.equals(">")
+                    || redirectOperator.equals("1>>") || redirectOperator.equals(">>")) {
                 out = new PrintStream(Files.newOutputStream(outputFile.toPath()));
                 err = System.err;
-            } else {
+            } else if (redirectOperator.equals("2>")) {
                 out = System.out;
                 err = new PrintStream(Files.newOutputStream(outputFile.toPath()));
+            } else if (redirectOperator.equals(">>") || redirectOperator.equals("1>>")) {
+                out = new PrintStream(Files.newOutputStream(outputFile.toPath(), StandardOpenOption.CREATE,
+                        StandardOpenOption.APPEND));
+                err = System.err;
+            } else if (redirectOperator.equals("2>>")) {
+                out = System.out;
+                err = new PrintStream(Files.newOutputStream(outputFile.toPath(), StandardOpenOption.CREATE,
+                        StandardOpenOption.APPEND));
+            } else {
+                out = System.out;
+                err = System.err;
             }
         } else {
             // print to normal stdout
@@ -134,6 +148,21 @@ public class Shell {
         idx = tokens.indexOf("2>");
         if (idx != -1) {
             return "2>";
+        }
+
+        idx = tokens.indexOf(">>");
+        if (idx != -1) {
+            return ">>";
+        }
+
+        idx = tokens.indexOf("1>>");
+        if (idx != -1) {
+            return "1>>";
+        }
+
+        idx = tokens.indexOf("2>>");
+        if (idx != -1) {
+            return "2>>";
         }
 
         return null;
