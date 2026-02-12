@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -14,7 +15,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         try {
-            do {
+            while (true) {
                 System.out.print("$ ");
                 String input = sc.nextLine();
 
@@ -24,30 +25,75 @@ public class Main {
 
                 List<String> tokens = Tokenizer.tokenize(input);
 
-                String command = tokens.get(0);
+                executeCommand(tokens);
 
-                List<String> arguments = (tokens.size() > 1)
-                        ? tokens.subList(1, tokens.size())
-                        : Collections.emptyList();
-
-                if (isBuiltin(command)) {
-                    switch (command) {
-                        case "exit" -> exit();
-                        case "echo" -> echo(arguments);
-                        case "type" -> type(arguments.get(0));
-                        case "pwd" -> pwd();
-                        case "cd" -> cd(arguments);
-                    }
-                } else if (isExecutable(command)) {
-                    execute(tokens);
-                } else {
-                    System.out.println(command + ": command not found");
-                }
-
-            } while (true);
+            }
         } catch (IOException e) {
             System.out.println("Exception: " + e.getMessage());
         }
+    }
+
+    private static void executeCommand(List<String> tokens) throws IOException {
+        String command = tokens.get(0);
+
+        List<String> arguments = (tokens.size() > 1)
+                ? tokens.subList(1, tokens.size())
+                : Collections.emptyList();
+
+        if (isRedirectable(tokens)) {
+            redirect(tokens);
+        } else if (isExecutable(command)) {
+            execute(tokens);
+        } else if (isBuiltin(command)) {
+            builtin(command, arguments);
+        } else {
+            System.out.println(command + ": command not found");
+        }
+    }
+
+    private static void builtin(String command, List<String> arguments) throws IOException {
+        switch (command) {
+            case "exit" -> exit();
+            case "echo" -> echo(arguments);
+            case "type" -> type(arguments.get(0));
+            case "pwd" -> pwd();
+            case "cd" -> cd(arguments);
+        }
+    }
+
+    private static void redirect(List<String> tokens) throws IOException {
+        int splitIndex = 0;
+        // find the split
+        if (tokens.contains(">")) {
+            splitIndex = tokens.indexOf(">");
+        } else if (tokens.contains("1>")) {
+            splitIndex = tokens.indexOf("1>");
+        }
+
+        // split the array
+        List<String> arguments = tokens.subList(0, splitIndex);
+
+        // get file path
+        Path path = Path.of(tokens.get(splitIndex + 1));
+
+        PrintStream originalOut = System.out;
+
+        try (PrintStream fileOut = new PrintStream(Files.newOutputStream(path))) {
+            System.setOut(fileOut);
+            executeCommand(arguments);
+            System.out.flush();
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    private static boolean isRedirectable(List<String> tokens) {
+        for (String token : tokens) {
+            if (token.equals(">") || token.equals("1>")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void exit() {
