@@ -12,7 +12,7 @@ public class PwdCommand implements Command {
     }
 
     @Override
-    public void execute(List<String> args, PrintStream out) {
+    public void execute(List<String> args, PrintStream out, PrintStream err) {
         out.println(shell.getCurrentDirectory());
     }
 }
