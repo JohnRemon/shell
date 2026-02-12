@@ -38,16 +38,23 @@ public class ExternalCommand implements Command {
         processBuilder.directory(shell.getCurrentDirectory().toFile());
 
         File redirectFile = shell.getRedirectFile();
+        String redirectOperator = shell.getRedirectOperator();
 
         // if there is redirection to a file
         if (redirectFile != null) {
-            // redirect output to the redirection file
-            processBuilder.redirectOutput(redirectFile);
+            // redirect output to the correct redirection file
+            if (redirectOperator.equals(">") || redirectOperator.equals("1>")) {
+                processBuilder.redirectOutput(redirectFile);
+                processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            } else {
+                processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                processBuilder.redirectError(redirectFile);
+            }
         } else {
             // redirect to normal output
             processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
         }
-        processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
 
         Process process = processBuilder.start();
         process.waitFor();

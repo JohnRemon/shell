@@ -16,6 +16,7 @@ public class Shell {
     private final ExternalCommand externalCommand;
 
     private File redirectFile;
+    private String redirectOperator;
 
     public Shell() {
         this.currentDirectory = Path.of(System.getProperty("user.dir"));
@@ -31,7 +32,8 @@ public class Shell {
 
     public void executeCommand(List<String> tokens) throws Exception {
         // Find the index of '>' || '1>' || '2>'
-        int redirectIndex = findRedirectIndex(tokens);
+        String redirectOperator = findRedirectOperator(tokens);
+        int redirectIndex = tokens.indexOf(redirectOperator);
 
         // Initialize command tokens and output file if any
         List<String> commandTokens;
@@ -71,62 +73,70 @@ public class Shell {
 
         // set the redirect file
         this.redirectFile = outputFile;
+        this.redirectOperator = redirectOperator;
+
+        // to print either to redirection file or normal stdout ('>' || '1>')
+        PrintStream out;
+        // to print error to redirection file or normal stderr ('2>')
+        PrintStream err;
+
+        // if redirection file exists
+        if (outputFile != null) {
+            if (redirectOperator.equals("1>") || redirectOperator.equals(">")) {
+                out = new PrintStream(Files.newOutputStream(outputFile.toPath()));
+                err = System.err;
+            } else {
+                out = System.out;
+                err = new PrintStream(Files.newOutputStream(outputFile.toPath()));
+            }
+        } else {
+            // print to normal stdout
+            out = System.out;
+            err = System.err;
+        }
 
         try {
-            // if it is a built in
             if (builtins.containsKey(command)) {
-                // to print either to redirection file or normal stdout ('>' || '1>')
-                PrintStream out;
-                // to print error to redirection file or normal stderr ('2>')
-                PrintStream err;
-
-                // if redirection file exists
-                if (outputFile != null) {
-                    // print to file
-                    out = new PrintStream(Files.newOutputStream(outputFile.toPath()));
-                    err = new PrintStream(Files.newOutputStream(outputFile.toPath()));
-                } else {
-                    // print to normal stdout
-                    out = System.out;
-                    err = System.out;
-                }
-
-                try {
-                    // execute the command
-                    builtins.get(command).execute(arguments, out, err);
-
-                    // flush for files
-                    out.flush();
-                } finally {
-
-                    // close output to file
-                    if (outputFile != null) {
-                        out.close();
-                    }
-                }
+                builtins.get(command).execute(arguments, out, err);
             } else if (findExecutable(command) != null) {
-                externalCommand.execute(commandTokens, System.out, System.err);
+                externalCommand.execute(commandTokens, out, err);
             } else {
-                System.out.println(command + ": command not found");
+                err.println(command + ": command not found");
             }
         } finally {
+            // close output to file
+            if (out != System.out) {
+                out.flush();
+                out.close();
+            }
+            if (err != System.err) {
+                err.flush();
+                err.close();
+            }
+
             // set redirection file to null
             this.redirectFile = null;
+            this.redirectOperator = null;
         }
     }
 
-    private int findRedirectIndex(List<String> tokens) {
+    private String findRedirectOperator(List<String> tokens) {
         int idx = tokens.indexOf(">");
         if (idx != -1) {
-            return idx;
+            return ">";
         }
 
         idx = tokens.indexOf("1>");
         if (idx != -1) {
-            return idx;
+            return "1>";
         }
 
-        return tokens.indexOf("2>");
+        idx = tokens.indexOf("2>");
+        if (idx != -1) {
+            return "2>";
+        }
+
+        return null;
     }
 
     public boolean isBuiltin(String command) {
@@ -158,5 +168,9 @@ public class Shell {
 
     public File getRedirectFile() {
         return redirectFile;
+    }
+
+    public String getRedirectOperator() {
+        return redirectOperator;
     }
 }
