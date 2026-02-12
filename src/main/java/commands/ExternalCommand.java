@@ -42,21 +42,29 @@ public class ExternalCommand implements Command {
 
         // if there is redirection to a file
         if (redirectFile != null) {
-            // redirect output to the correct redirection file
-            if (redirectOperator.equals(">") || redirectOperator.equals("1>")
-                    || redirectOperator.equals(">>") || redirectOperator.equals("1>>")) {
+            // correct redirection
+            if (redirectOperator.equals(">") || redirectOperator.equals("1>")) {
+                // Truncate stdout
                 processBuilder.redirectOutput(redirectFile);
                 processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
-            } else if (redirectOperator.equals("2>") || redirectOperator.equals("2>>")) {
+            } else if (redirectOperator.equals(">>") || redirectOperator.equals("1>>")) {
+                // Append stdout
+                processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(redirectFile));
+                processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            } else if (redirectOperator.equals("2>")) {
+                // Truncate stderr
                 processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 processBuilder.redirectError(redirectFile);
+            } else if (redirectOperator.equals("2>>")) {
+                // Append stderr
+                processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(redirectFile));
             }
         } else {
-            // redirect to normal output
+            // normal stdout and stderr
             processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
             processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
         }
-
         Process process = processBuilder.start();
         process.waitFor();
     }
