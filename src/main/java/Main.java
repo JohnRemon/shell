@@ -30,7 +30,7 @@ public class Main {
                 .build();
 
         while (true) {
-            String input = reader.readLine("> ");
+            String input = reader.readLine("$ ");
 
             if (input.isEmpty()) {
                 continue;
