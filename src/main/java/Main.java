@@ -3,10 +3,10 @@ import java.util.List;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.DefaultParser;
-import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
+import autocomplete.CustomCompleter;
 import commands.Shell;
 
 public class Main {
@@ -21,7 +21,7 @@ public class Main {
         DefaultParser parser = new DefaultParser();
         parser.setEscapeChars(null);
 
-        StringsCompleter completer = new StringsCompleter("echo", "exit");
+        CustomCompleter completer = new CustomCompleter();
 
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(terminal)
