@@ -1,7 +1,7 @@
 package autocomplete;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Trie {
 
@@ -50,8 +50,8 @@ public class Trie {
         return true;
     }
 
-    public List<String> findWordsWithPrefix(String prefix) {
-        List<String> res = new ArrayList<>();
+    public Set<String> findWordsWithPrefix(String prefix) {
+        Set<String> res = new HashSet<>();
         TrieNode curr = root;
 
         for (char c : prefix.toCharArray()) {
@@ -67,7 +67,7 @@ public class Trie {
         return res;
     }
 
-    private void findWordsWithPrefixHelper(List<String> res, TrieNode curr, StringBuilder word) {
+    private void findWordsWithPrefixHelper(Set<String> res, TrieNode curr, StringBuilder word) {
 
         if (curr.isEndOfWord()) {
             res.add(word.toString());

@@ -5,18 +5,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
-import org.jline.reader.Candidate;
-import org.jline.reader.Completer;
-import org.jline.reader.LineReader;
-import org.jline.reader.ParsedLine;
-
-public class CustomCompleter implements Completer {
+public class CustomCompleter {
     private static final List<String> COMMANDS = List.of("cd", "echo", "exit", "pwd");
     private Trie trie;
 
-    public CustomCompleter() throws IOException {
+    public CustomCompleter() {
         this.trie = new Trie();
 
         for (String command : COMMANDS) {
@@ -36,14 +32,7 @@ public class CustomCompleter implements Completer {
         }
     }
 
-    @Override
-    public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
-        String word = line.word().toLowerCase();
-
-        List<String> matches = trie.findWordsWithPrefix(word);
-
-        for (String match : matches) {
-            candidates.add(new Candidate(match));
-        }
+    public Set<String> findMatches(String prefix) {
+        return trie.findWordsWithPrefix(prefix);
     }
 }
