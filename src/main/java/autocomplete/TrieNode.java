@@ -1,18 +1,30 @@
 package autocomplete;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 public class TrieNode {
-    private final Map<Character, TrieNode> children;
+    private char data;
+    private TrieNode[] children;
     private boolean endOfWord;
 
     public TrieNode() {
-        this.children = new TreeMap<>();
+        this.children = new TrieNode[128];
         this.endOfWord = false;
     }
 
-    public Map<Character, TrieNode> getChildren() {
+    public TrieNode(char data) {
+        this.data = data;
+        this.children = new TrieNode[128];
+        this.endOfWord = false;
+    }
+
+    public char getData() {
+        return data;
+    }
+
+    public void setData(char data) {
+        this.data = data;
+    }
+
+    public TrieNode[] getChildren() {
         return children;
     }
 
