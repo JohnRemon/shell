@@ -35,4 +35,8 @@ public class CustomCompleter {
     public Set<String> findMatches(String prefix) {
         return trie.findWordsWithPrefix(prefix);
     }
+
+    public String findLowestCommonPrefix(List<String> strs) {
+        return trie.lowestCommonPrefix(strs);
+    }
 }

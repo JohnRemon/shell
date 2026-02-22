@@ -1,6 +1,7 @@
 package autocomplete;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Trie {
@@ -65,6 +66,23 @@ public class Trie {
         findWordsWithPrefixHelper(res, curr, new StringBuilder(prefix));
 
         return res;
+    }
+
+    public String lowestCommonPrefix(List<String> strs) {
+        String prefix = strs.get(0);
+
+        for (int i = 0; i < prefix.length(); i++) {
+            int j = 0;
+            while (j < Math.min(prefix.length(), strs.get(i).length())) {
+                if (strs.get(i).charAt(j) != prefix.charAt(j)) {
+                    break;
+                }
+                j++;
+            }
+            prefix = strs.get(i).substring(0, j);
+        }
+
+        return prefix;
     }
 
     private void findWordsWithPrefixHelper(Set<String> res, TrieNode curr, StringBuilder word) {

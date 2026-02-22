@@ -65,12 +65,14 @@ public class InputHandler {
             return 0;
         }
 
+        // find all matches
         Set<String> matches = customCompleter.findMatches(input);
         if (matches.isEmpty()) {
             bell();
             return 0;
         }
 
+        // sort alphabetically
         List<String> sorted = new ArrayList<>(matches);
         Collections.sort(sorted);
 
@@ -80,12 +82,23 @@ public class InputHandler {
             buffer.append(completion);
             System.out.print(completion);
             System.out.flush();
-            return 0;
+            return 0; // reset
         }
 
-        // FIRST TAB: ring bell
+        // FIRST TAB: ring bell and lcp
         if (tabCount == 0) {
             bell();
+
+            // lowest common prefix logic
+            String lowestCommonPrefix = customCompleter.findLowestCommonPrefix(sorted);
+
+            if (lowestCommonPrefix.length() > input.length()) {
+                String completion = lowestCommonPrefix.substring(input.length()) + " ";
+                buffer.append(completion);
+                System.out.print(completion);
+                System.out.flush();
+            }
+
             return 1;
         }
 
