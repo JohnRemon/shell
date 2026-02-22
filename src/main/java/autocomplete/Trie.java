@@ -71,7 +71,7 @@ public class Trie {
     public String lowestCommonPrefix(List<String> strs) {
         String prefix = strs.get(0);
 
-        for (int i = 0; i < prefix.length(); i++) {
+        for (int i = 1; i < strs.size(); i++) {
             int j = 0;
             while (j < Math.min(prefix.length(), strs.get(i).length())) {
                 if (strs.get(i).charAt(j) != prefix.charAt(j)) {
