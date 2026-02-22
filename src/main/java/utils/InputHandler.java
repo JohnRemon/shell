@@ -74,6 +74,15 @@ public class InputHandler {
         List<String> sorted = new ArrayList<>(matches);
         Collections.sort(sorted);
 
+        // FIRST TAB: complete if only one match
+        if (sorted.size() == 1) {
+            String completion = sorted.get(0).substring(input.length());
+            buffer.append(completion);
+            System.out.print(completion);
+            System.out.flush();
+            return 0;
+        }
+
         // FIRST TAB: ring bell
         if (tabCount == 0) {
             bell();
