@@ -76,15 +76,6 @@ public class InputHandler {
         List<String> sorted = new ArrayList<>(matches);
         Collections.sort(sorted);
 
-        // FIRST TAB: complete if only one match
-        if (sorted.size() == 1) {
-            String completion = sorted.get(0).substring(input.length()) + " ";
-            buffer.append(completion);
-            System.out.print(completion);
-            System.out.flush();
-            return 0; // reset
-        }
-
         // FIRST TAB: ring bell and lcp
         if (tabCount == 0) {
             bell();
@@ -93,12 +84,20 @@ public class InputHandler {
             String lowestCommonPrefix = customCompleter.findLowestCommonPrefix(sorted);
 
             if (lowestCommonPrefix.length() > input.length()) {
-                String completion = lowestCommonPrefix.substring(input.length()) + " ";
+                String completion = lowestCommonPrefix.substring(input.length());
                 buffer.append(completion);
                 System.out.print(completion);
                 System.out.flush();
             }
 
+            // complete if only one match
+            if (sorted.size() == 1) {
+                String completion = sorted.get(0).substring(input.length()) + " ";
+                buffer.append(completion);
+                System.out.print(completion);
+                System.out.flush();
+                return 0; // reset
+            }
             return 1;
         }
 
