@@ -91,13 +91,12 @@ public class InputHandler {
             }
 
             // complete if only one match
-            if (sorted.size() == 1) {
-                String completion = sorted.get(0).substring(input.length()) + " ";
-                buffer.append(completion);
-                System.out.print(completion);
-                System.out.flush();
-                return 0; // reset
+            if (sorted.size() == 1 && buffer.length() == sorted.get(0).length()) {
+                buffer.append(" ");
+                System.out.print(" ");
             }
+
+            System.out.flush();
             return 1;
         }
 
