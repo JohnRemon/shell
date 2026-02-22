@@ -76,7 +76,7 @@ public class InputHandler {
 
         // FIRST TAB: complete if only one match
         if (sorted.size() == 1) {
-            String completion = sorted.get(0).substring(input.length());
+            String completion = sorted.get(0);
             buffer.append(completion);
             System.out.print(completion);
             System.out.flush();
