@@ -8,29 +8,23 @@ import org.jline.terminal.TerminalBuilder;
 
 import autocomplete.CustomCompleter;
 import commands.Shell;
+import utils.TerminalRawMode;
+import utils.Tokenizer;
+import utils.InputHandler;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
+        Runtime.getRuntime().addShutdownHook(new Thread(TerminalRawMode::disable));
         Shell shell = new Shell();
 
-        Terminal terminal = TerminalBuilder.builder()
-                .system(true)
-                .build();
-
-        DefaultParser parser = new DefaultParser();
-        parser.setEscapeChars(null);
-
-        CustomCompleter completer = new CustomCompleter();
-
-        LineReader reader = LineReaderBuilder.builder()
-                .terminal(terminal)
-                .parser(parser)
-                .completer(completer)
-                .build();
-
         while (true) {
-            String input = reader.readLine("$ ");
+            TerminalRawMode.enable();
+            System.out.print("$ ");
+            String input = InputHandler.getInput();
+            System.out.print("\r");
+            System.out.flush();
+            TerminalRawMode.disable();
 
             if (input.isEmpty()) {
                 continue;
