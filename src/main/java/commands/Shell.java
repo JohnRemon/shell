@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 
 public class Shell {
 
@@ -57,6 +57,7 @@ public class Shell {
 
             // create executor service
             ExecutorService executorService = Executors.newFixedThreadPool(pipelineCommands.size());
+            List<Future<?>> futures = new ArrayList<>();
 
             for (int i = 0; i < pipelineCommands.size(); i++) {
                 List<String> command = pipelineCommands.get(i);
@@ -77,7 +78,7 @@ public class Shell {
                     out = new PrintStream(pipedOutputStreams[i]);
                 }
 
-                executorService.submit(() -> {
+                futures.add(executorService.submit(() -> {
                     try {
                         executeCommand(command, in, out, err);
                     } catch (Exception e) {
@@ -87,10 +88,11 @@ public class Shell {
                             out.close();
                         }
                     }
-                });
+                }));
             }
+
+            futures.getLast().get();
             executorService.shutdown();
-            executorService.awaitTermination(30, TimeUnit.SECONDS);
             return;
         }
 

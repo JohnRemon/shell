@@ -78,7 +78,15 @@ public class ExternalCommand implements Command {
                 processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
                 Process process = processBuilder.start();
                 getInput(in, process.getOutputStream());
-                process.getInputStream().transferTo(out);
+
+                new Thread(() -> {
+                    try {
+                        process.getInputStream().transferTo(out);
+                        out.close();
+                    } catch (IOException e) {
+                    }
+                }).start();
+
                 process.waitFor();
             } else {
                 processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
