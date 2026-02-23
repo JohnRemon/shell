@@ -1,7 +1,6 @@
 package commands;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
@@ -61,20 +60,15 @@ public class Shell {
             for (int i = 0; i < pipelineCommands.size(); i++) {
                 List<String> command = pipelineCommands.get(i);
 
-                InputStream in;
                 PrintStream out;
-                PrintStream err = System.err;
-
-                if (i == 0) {
-                    in = System.in;
-                } else {
-                    in = pipedInputStreams[i - 1];
-                }
+                PrintStream err;
 
                 if (i == pipelineCommands.size() - 1) {
                     out = System.out;
+                    err = System.err;
                 } else {
                     out = new PrintStream(pipedOutputStreams[i]);
+                    err = new PrintStream(pipedOutputStreams[i]);
                 }
 
                 executorService.submit(() -> {
