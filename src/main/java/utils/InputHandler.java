@@ -80,17 +80,19 @@ public class InputHandler {
         if (tabCount == 0) {
             bell();
 
-            // lowest common prefix logic
+            // find lowest common prefix
             String lowestCommonPrefix = customCompleter.findLowestCommonPrefix(sorted);
 
+            // if the prefix is longer than input (use the prefix)
             if (lowestCommonPrefix.length() > input.length()) {
+                // doesn't take old chars
                 String completion = lowestCommonPrefix.substring(input.length());
                 buffer.append(completion);
                 System.out.print(completion);
                 System.out.flush();
             }
 
-            // complete if only one match
+            // complete if only one match and word is in buffer
             if (sorted.size() == 1 && buffer.length() == sorted.get(0).length()) {
                 buffer.append(" ");
                 System.out.print(" ");

@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,25 @@ public class Shell {
     }
 
     public void executeCommand(List<String> tokens) throws Exception {
+        // split into commands if pipeline
+        List<List<String>> pipelineCommands = findPipeline(tokens);
+
+        // if more than one command start the pipeline
+        if (pipelineCommands.size() > 1) {
+            List<ProcessBuilder> processBuilders = new ArrayList<>();
+            for (List<String> pipelineCommand : pipelineCommands) {
+                ProcessBuilder processBuilder = new ProcessBuilder(pipelineCommand);
+                processBuilder.directory(currentDirectory.toFile());
+                processBuilders.add(processBuilder);
+            }
+
+            processBuilders.getLast().redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            processBuilders.getLast().redirectError(ProcessBuilder.Redirect.INHERIT);
+            List<Process> processes = ProcessBuilder.startPipeline(processBuilders);
+            processes.getLast().waitFor();
+            return;
+        }
+
         // Find the index of '>' || '1>' || '2>'
         String redirectOperator = findRedirectOperator(tokens);
         int redirectIndex = tokens.indexOf(redirectOperator);
@@ -102,9 +122,7 @@ public class Shell {
                 out = System.out;
                 err = System.err;
             }
-        } else
-
-        {
+        } else {
             // print to normal stdout
             out = System.out;
             err = System.err;
@@ -167,6 +185,25 @@ public class Shell {
         }
 
         return null;
+    }
+
+    private List<List<String>> findPipeline(List<String> tokens) {
+        int idx = tokens.indexOf("|");
+
+        if (idx == -1) {
+            return new ArrayList<>(List.of(tokens));
+        }
+
+        List<List<String>> res = new ArrayList<>();
+        int start = 0;
+        for (int i = 0; i < tokens.size(); i++) {
+            if (tokens.get(i).equals("|") || tokens.get(i).equals("&&")) {
+                res.add(new ArrayList<>(tokens.subList(start, i)));
+                start = i + 1;
+            }
+        }
+        res.add(new ArrayList<>(tokens.subList(start, tokens.size())));
+        return res;
     }
 
     public boolean isBuiltin(String command) {

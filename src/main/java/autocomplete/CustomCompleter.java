@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public class CustomCompleter {
-    private static final List<String> COMMANDS = List.of("cd", "echo", "exit", "pwd");
+    private static final List<String> COMMANDS = List.of("cd", "echo", "exit", "pwd", "type");
     private Trie trie;
 
     public CustomCompleter() {
