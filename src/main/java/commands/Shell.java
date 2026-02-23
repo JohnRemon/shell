@@ -1,6 +1,9 @@
 package commands;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +13,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Shell {
 
@@ -38,17 +44,53 @@ public class Shell {
 
         // if more than one command start the pipeline
         if (pipelineCommands.size() > 1) {
-            List<ProcessBuilder> processBuilders = new ArrayList<>();
-            for (List<String> pipelineCommand : pipelineCommands) {
-                ProcessBuilder processBuilder = new ProcessBuilder(pipelineCommand);
-                processBuilder.directory(currentDirectory.toFile());
-                processBuilders.add(processBuilder);
+
+            // create piped streams
+            PipedInputStream[] pipedInputStreams = new PipedInputStream[pipelineCommands.size() - 1];
+            PipedOutputStream[] pipedOutputStreams = new PipedOutputStream[pipelineCommands.size() - 1];
+
+            // thread the piped streams
+            for (int i = 0; i < pipelineCommands.size() - 1; i++) {
+                pipedOutputStreams[i] = new PipedOutputStream();
+                pipedInputStreams[i] = new PipedInputStream(pipedOutputStreams[i]);
             }
 
-            processBuilders.getLast().redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            processBuilders.getLast().redirectError(ProcessBuilder.Redirect.INHERIT);
-            List<Process> processes = ProcessBuilder.startPipeline(processBuilders);
-            processes.getLast().waitFor();
+            // create executor service
+            ExecutorService executorService = Executors.newFixedThreadPool(pipelineCommands.size());
+
+            for (int i = 0; i < pipelineCommands.size(); i++) {
+                List<String> command = pipelineCommands.get(i);
+
+                InputStream in;
+                PrintStream out;
+                PrintStream err = System.err;
+
+                if (i == 0) {
+                    in = System.in;
+                } else {
+                    in = pipedInputStreams[i - 1];
+                }
+
+                if (i == pipelineCommands.size() - 1) {
+                    out = System.out;
+                } else {
+                    out = new PrintStream(pipedOutputStreams[i]);
+                }
+
+                executorService.submit(() -> {
+                    try {
+                        executeCommand(command, out, err);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (out != System.out) {
+                            out.close();
+                        }
+                    }
+                });
+            }
+            executorService.shutdown();
+            executorService.awaitTermination(30, TimeUnit.SECONDS);
             return;
         }
 
@@ -83,14 +125,6 @@ public class Shell {
         if (commandTokens.isEmpty()) {
             return;
         }
-
-        // extract the first word (command)
-        String command = commandTokens.get(0);
-
-        // extract the arguments
-        List<String> arguments = commandTokens.size() > 1
-                ? commandTokens.subList(1, commandTokens.size())
-                : Collections.emptyList();
 
         // set the redirect file
         this.redirectFile = outputFile;
@@ -129,13 +163,7 @@ public class Shell {
         }
 
         try {
-            if (builtins.containsKey(command)) {
-                builtins.get(command).execute(arguments, out, err);
-            } else if (findExecutable(command) != null) {
-                externalCommand.execute(commandTokens, out, err);
-            } else {
-                err.println(command + ": command not found");
-            }
+            executeCommand(commandTokens, out, err);
         } finally {
             // close output to file
             if (out != System.out) {
@@ -150,6 +178,24 @@ public class Shell {
             // set redirection file to null
             this.redirectFile = null;
             this.redirectOperator = null;
+        }
+    }
+
+    private void executeCommand(List<String> commandTokens, PrintStream out, PrintStream err) throws Exception {
+        // extract the first word (command)
+        String command = commandTokens.get(0);
+
+        // extract the arguments
+        List<String> arguments = commandTokens.size() > 1
+                ? commandTokens.subList(1, commandTokens.size())
+                : Collections.emptyList();
+
+        if (builtins.containsKey(command)) {
+            builtins.get(command).execute(arguments, out, err);
+        } else if (findExecutable(command) != null) {
+            externalCommand.execute(commandTokens, out, err);
+        } else {
+            err.println(command + ": command not found");
         }
     }
 

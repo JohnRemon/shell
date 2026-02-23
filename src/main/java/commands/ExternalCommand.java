@@ -61,11 +61,18 @@ public class ExternalCommand implements Command {
                 processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(redirectFile));
             }
         } else {
-            // normal stdout and stderr
-            processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            // normal stdout and stderr but check for pipe rerouting
             processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            if (out != System.out) {
+                processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
+                Process process = processBuilder.start();
+                process.getInputStream().transferTo(out);
+                process.waitFor();
+            } else {
+                processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                Process process = processBuilder.start();
+                process.waitFor();
+            }
         }
-        Process process = processBuilder.start();
-        process.waitFor();
     }
 }
