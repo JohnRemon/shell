@@ -1,7 +1,9 @@
 package commands;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,35 +70,34 @@ public class ExternalCommand implements Command {
             }
 
             Process process = processBuilder.start();
-            if (in != System.in) {
-                in.transferTo(process.getOutputStream());
-                process.getOutputStream().close();
-                process.waitFor();
-            }
+            getInput(in, process.getOutputStream());
+            process.waitFor();
         } else {
             // normal stdout and stderr but check for pipe rerouting
             if (out != System.out) {
                 processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
                 Process process = processBuilder.start();
-
-                if (in != System.in) {
-                    in.transferTo(process.getOutputStream());
-                    process.getOutputStream().close();
-                }
-
+                getInput(in, process.getOutputStream());
                 process.getInputStream().transferTo(out);
                 process.waitFor();
             } else {
                 processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                 Process process = processBuilder.start();
-
-                if (in != System.in) {
-                    in.transferTo(process.getOutputStream());
-                    process.getOutputStream().close();
-                }
-
+                getInput(in, process.getOutputStream());
                 process.waitFor();
             }
+        }
+    }
+
+    private void getInput(InputStream in, OutputStream out) throws IOException {
+        if (in != System.in) {
+            new Thread(() -> {
+                try {
+                    in.transferTo(out);
+                    out.close();
+                } catch (IOException e) {
+                }
+            }).start();
         }
     }
 }
