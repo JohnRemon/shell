@@ -1,5 +1,6 @@
 package commands;
 
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,7 +15,7 @@ public class CdCommand implements Command {
     }
 
     @Override
-    public void execute(List<String> args, PrintStream out, PrintStream err) {
+    public void execute(List<String> args, InputStream in, PrintStream out, PrintStream err) {
         if (args.size() != 1) {
             err.println("cd: " + args + ": No such file or directory");
             return;

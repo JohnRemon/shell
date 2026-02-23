@@ -1,6 +1,7 @@
 package commands;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
@@ -60,20 +61,25 @@ public class Shell {
             for (int i = 0; i < pipelineCommands.size(); i++) {
                 List<String> command = pipelineCommands.get(i);
 
+                InputStream in;
                 PrintStream out;
-                PrintStream err;
+                PrintStream err = System.err;
+
+                if (i == 0) {
+                    in = System.in;
+                } else {
+                    in = pipedInputStreams[i - 1];
+                }
 
                 if (i == pipelineCommands.size() - 1) {
                     out = System.out;
-                    err = System.err;
                 } else {
                     out = new PrintStream(pipedOutputStreams[i]);
-                    err = new PrintStream(pipedOutputStreams[i]);
                 }
 
                 executorService.submit(() -> {
                     try {
-                        executeCommand(command, out, err);
+                        executeCommand(command, in, out, err);
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -129,6 +135,7 @@ public class Shell {
         PrintStream out;
         // to print error to redirection file or normal stderr ('2>' || '2>>')
         PrintStream err;
+        InputStream in = System.in;
 
         // if redirection file exists
         if (outputFile != null) {
@@ -157,7 +164,7 @@ public class Shell {
         }
 
         try {
-            executeCommand(commandTokens, out, err);
+            executeCommand(commandTokens, in, out, err);
         } finally {
             // close output to file
             if (out != System.out) {
@@ -175,7 +182,9 @@ public class Shell {
         }
     }
 
-    private void executeCommand(List<String> commandTokens, PrintStream out, PrintStream err) throws Exception {
+    private void executeCommand(List<String> commandTokens, InputStream in, PrintStream out, PrintStream err)
+            throws Exception {
+
         // extract the first word (command)
         String command = commandTokens.get(0);
 
@@ -185,9 +194,9 @@ public class Shell {
                 : Collections.emptyList();
 
         if (builtins.containsKey(command)) {
-            builtins.get(command).execute(arguments, out, err);
+            builtins.get(command).execute(arguments, in, out, err);
         } else if (findExecutable(command) != null) {
-            externalCommand.execute(commandTokens, out, err);
+            externalCommand.execute(commandTokens, in, out, err);
         } else {
             err.println(command + ": command not found");
         }
